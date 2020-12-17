@@ -1,0 +1,47 @@
+library(ggplot2)
+library(lmtest)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+funnel_time <-read_csv("funnel_time.csv")
+
+# list of potential variables to examine
+BRIDGE_CLICKS
+SALES
+AD_CLICKS
+
+View(funnel_time)
+
+#get rid of 0s
+funnel_time_no_0 <- filter(funnel_time, TOTAL_TIME_TAKEN_COMPLETE_FUNNEL != 0)
+View(funnel_time_no_0)
+
+#histogram
+qplot(funnel_time_no_0$TOTAL_TIME_TAKEN_COMPLETE_FUNNEL, geom="histogram") 
+
+#scatterplot
+ggplot(data=funnel_time_no_0, aes(x=TOTAL_TIME_TAKEN_COMPLETE_FUNNEL, y= SALES)) +
+  geom_point() 
+
+#linear correlation
+model <- lm(SALES ~ TOTAL_TIME_TAKEN_COMPLETE_FUNNEL,data=funnel_time_no_0)
+summary(model)
+
+#linear regression
+res <- cor.test(funnel_time_no_0$BRIDGE_CLICKS, funnel_time_no_0$TOTAL_TIME_TAKEN_COMPLETE_FUNNEL, 
+                method ="pearson", use = "complete.obs")
+res
+
+#poly regression
+model_poly <- lm(AD_CLICKS ~ poly(TOTAL_TIME_TAKEN_COMPLETE_FUNNEL,3),data=funnel_time_no_0)
+summary(model_poly)
+
+#poly regression chart
+ggplot(data=funnel_time_no_0, aes(x=TOTAL_TIME_TAKEN_COMPLETE_FUNNEL, y= UNIQUE_AD_CLICKS)) +
+  geom_point()+
+  geom_smooth(model_poly=lm,se=FALSE) 
+
+#enter potential funnel times
+new_funnel_time <- data.frame(TOTAL_TIME_TAKEN_COMPLETE_FUNNEL = c(1000,1200,1400,1600))
+#predict based on polynomial regression
+predict(model_poly,data.frame(TOTAL_TIME_TAKEN_COMPLETE_FUNNEL=new_funnel_time))
