@@ -1,0 +1,1 @@
+This is an exercise to determine if there is a relationship between the time spent in the funnel of a web product and the likelihood to undertake a revenue-generating action. Linear and polynomial regression are used to determine the presence of a relationship.
